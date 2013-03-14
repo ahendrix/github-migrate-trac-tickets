@@ -56,6 +56,8 @@ parser.add_option('--open', dest='only_open', action='store_true', default=False
                   help="Only migrate open tickets")
 parser.add_option('--component-name', dest='component_name', action='store_true', default=False,
                   help="Prepend the summary with the component name")
+parser.add_option('--kforge', dest='kforge', action='store_true', default=False,
+                  help="Interpret timestamps as microseconds (for Kforge trac DBs)")
 
 (options, args) = parser.parse_args()
 try:
@@ -145,6 +147,9 @@ for tid, priority, ticket_type, summary, description, owner, reporter, milestone
     if options.component_name:
         summary = trac_component+ ": " + summary
 
+    if options.kforge:
+        timestamp = timestamp / 1000000
+
     summary += "  (ros ticket #%d)" % tid
     labels = []
     if ticket_type == "defect":
@@ -164,6 +169,7 @@ for tid, priority, ticket_type, summary, description, owner, reporter, milestone
         gh_labels[ priority ] = True
 
     logging.info("Ticket %d: %s" % (tid, summary))
+    logging.info("Timestamp: " + str(timestamp))
     if description:
         description = description.strip()
     if milestone:
